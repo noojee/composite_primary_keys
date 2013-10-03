@@ -4,7 +4,7 @@ class TestAssociations < ActiveSupport::TestCase
   fixtures :articles, :products, :tariffs, :product_tariffs, :suburbs, :streets, :restaurants,
            :dorms, :rooms, :room_attributes, :room_attribute_assignments, :students, :room_assignments, :users, :readings,
            :departments, :employees, :memberships, :membership_statuses
-  
+
   def test_products
     assert_not_nil products(:first_product).product_tariffs
     assert_equal 2, products(:first_product).product_tariffs.length
@@ -275,6 +275,18 @@ class TestAssociations < ActiveSupport::TestCase
     group.memberships.build
     associations = group.association_cache[:memberships]
     assert_equal(false, associations.send('foreign_key_present?'))
+  end
+
+  def test_dumpable_after_traversing_association
+    user = User.find(1)
+    user.readings.all # Fetch the association
+    assert_equal String, Marshal.dump(user).class
+  end
+
+  def test_dumpable_after_traversing_association_cpk
+    suburb = Suburb.find([1, 1])
+    suburb.streets.all # Fetch the association
+    assert_equal String, Marshal.dump(suburb).class
   end
 
 end
